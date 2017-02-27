@@ -54,7 +54,7 @@ class SrRobotCommander(object):
                         "right_hand": "rh_",
                         "left_hand": "lh_"}
 
-    def __init__(self, name, prefix=None):
+    def __init__(self, name, prefix=None, prefix_2=None):
         """
         Initialize MoveGroupCommander object
         @param name - name of the MoveIt group
@@ -88,6 +88,7 @@ class SrRobotCommander(object):
         # prefix of the trajectory controller
         if prefix is not None:
             self._prefix = prefix
+            self._prefix_2 = prefix_2
         elif name in self.__group_prefixes.keys():
             self._prefix = self.__group_prefixes[name]
         else:
@@ -543,6 +544,9 @@ class SrRobotCommander(object):
 
     def _get_trajectory_controller_name(self):
         return self._prefix + "trajectory_controller"
+    
+    def _get_trajectory_2_controller_name(self):
+        return self._prefix_2 + "trajectory_controller"
 
     def _set_up_action_client(self):
         """
@@ -550,12 +554,21 @@ class SrRobotCommander(object):
         """
         self._action_running = False
 
-        self._client = SimpleActionClient(
+        self._client_1 = SimpleActionClient(
             self._get_trajectory_controller_name() + "/follow_joint_trajectory",
             FollowJointTrajectoryAction
         )
+        
+        self._client_2 = SimpleActionClient(
+            self._get_trajectory_2_controller_name() + "/follow_joint_trajectory",
+            FollowJointTrajectoryAction
+        )
 
-        if self._client.wait_for_server(timeout=rospy.Duration(4)) is False:
+        if self._client_1.wait_for_server(timeout=rospy.Duration(4)) is False:
+            rospy.logfatal("Failed to connect to action server in 4 sec")
+            raise Exception("Failed to connect to action server in 4 sec")
+
+        if self._client_2.wait_for_server(timeout=rospy.Duration(4)) is False:
             rospy.logfatal("Failed to connect to action server in 4 sec")
             raise Exception("Failed to connect to action server in 4 sec")
 
@@ -594,7 +607,7 @@ class SrRobotCommander(object):
         if not wait:
             return
 
-        if not self._client.wait_for_result():
+        if not self._client_1.wait_for_result():
             rospy.loginfo("Trajectory not completed")
 
     def action_is_running(self):
@@ -606,7 +619,8 @@ class SrRobotCommander(object):
     def _call_action(self, goal):
         self._set_up_action_client()
         self._action_running = True
-        self._client.send_goal(goal, self._action_done_cb)
+        self._client_1.send_goal(goal, self._action_done_cb)
+        self._client_2.send_goal(goal, self._action_done_cb)
 
     def run_joint_trajectory_unsafe(self, joint_trajectory, wait=True):
         """
@@ -727,6 +741,5 @@ class SrRobotCommander(object):
         joint_state = self.get_ik(target_pose, avoid_collisions)
         if joint_state is not None:
             state_as_dict = dict(zip(joint_state.name, joint_state.position))
-            self.move_to_joint_value_target_unsafe(state_as_dict,
-                                                   time=time,
+            self.move_to_joint_value_target(state_as_dict,
                                                    wait=wait)
