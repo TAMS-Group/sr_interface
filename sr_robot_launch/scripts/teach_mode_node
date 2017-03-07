@@ -156,6 +156,9 @@ class TeachModeManager(object):
                              "left_arm": ControllerHelper(["la"], ["la_"])}
 
     def teach_mode(self, req):
+        if req.robot == "hand_h":
+            req.robot = "right_hand"
+
 
         if req.robot == "right_arm" or req.robot == "left_arm":
             if req.teach_mode == RobotTeachModeRequest.TRAJECTORY_MODE \

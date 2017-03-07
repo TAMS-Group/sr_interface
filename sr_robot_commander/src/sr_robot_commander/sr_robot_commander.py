@@ -656,7 +656,11 @@ class SrRobotCommander(object):
             mode = RobotTeachModeRequest.TEACH_MODE
         else:
             mode = RobotTeachModeRequest.TRAJECTORY_MODE
-        self.change_teach_mode(mode, self._name)
+
+        if self._name == "hand_h":
+            self.change_teach_mode(mode, "right_hand")
+        else:
+            self.change_teach_mode(mode, self._name)
 
     def move_to_trajectory_start(self, trajectory, wait=True):
         """
