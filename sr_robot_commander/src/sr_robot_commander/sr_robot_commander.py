@@ -732,7 +732,11 @@ class SrRobotCommander(object):
     def move_to_pose_value_target_unsafe(self, target_pose,  avoid_collisions=False, time=0.002, wait=True):
         joint_state = self.get_ik(target_pose, avoid_collisions)
         if joint_state is not None:
-            state_as_dict = dict(zip(joint_state.name, joint_state.position))
+            active_names = self._move_group_commander._g.get_active_joints()
+            state_as_dict = dict()
+            for n, joint in enumerate(joint_state.name):
+                if joint in active_names:
+                    state_as_dict[joint_state.name[n]] = joint_state.position[n]
             self.move_to_joint_value_target_unsafe(state_as_dict,
                                                    time=time,
                                                    wait=wait)
