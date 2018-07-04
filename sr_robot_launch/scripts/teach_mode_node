@@ -29,7 +29,8 @@ class ControllerHelper(object):
                        for hand_joint_prefix in self.robot_joint_prefixes],
             "position": ["sh_{0}{1}_position_controller".format(hand_joint_prefix, joint)
                          for joint in self.joints
-                         for hand_joint_prefix in self.robot_joint_prefixes],
+                         for hand_joint_prefix in self.robot_joint_prefixes
+                         if joint != "mfj4"], # -- don't load this one joint for now - it's broken in hardware
             "mixed": ["sh_{0}{1}_mixed_position_velocity_controller".format(hand_joint_prefix, joint)
                       for joint in self.joints
                       for hand_joint_prefix in self.robot_joint_prefixes],
