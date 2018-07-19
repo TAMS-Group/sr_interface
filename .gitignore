@@ -35,3 +35,9 @@
 
 #QtCreator files
 CMakeLists.txt.user
+
+# files that are (or might be) generated in-tree
+sr_moveit_hand_config/default_warehouse_mongo_db/
+sr_moveit_hand_config/config/generated_shadowhand.srdf
+sr_moveit_hand_config/config/generated_shadowhand.urdf
+sr_multi_moveit/sr_multi_moveit_config/config/generated_robot.srdf
